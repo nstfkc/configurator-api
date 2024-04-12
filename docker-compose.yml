@@ -1,0 +1,25 @@
+version: '3.3'
+
+services:
+  metzler-db:
+    image: postgres
+    container_name: metzler-db
+    restart: always
+    ports:
+      - '8432:5432'
+    # networks:
+    #   - metzler-network
+    environment:
+      POSTGRES_PASSWORD: 92deUXdY
+      POSTGRES_USER: admin
+      POSTGRES_DB: configurator-api
+    volumes:
+      - metzler-postgres:/var/lib/postgresql/data
+
+# networks:
+#   metzler-network:
+#     external: true
+
+volumes:
+  metzler-postgres:
+    driver: local

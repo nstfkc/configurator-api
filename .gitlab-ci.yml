@@ -1,0 +1,30 @@
+include:
+  - project: "devops/deploy"
+    ref: master
+    file: "node/lint.yml"
+
+stages:
+  - deploy
+
+.deploy:
+  stage: deploy
+  script:
+    - echo "${FILE_ENV?}" > ${DOCKERCOMPOSEROOT?}/.env
+    - rsync -avr --delete-after ./  ${DOCKERCOMPOSEROOT?}/admin-back/
+    - cd ${DOCKERCOMPOSEROOT?} && docker-compose build ${SERVICES?} && docker stop ${SERVICES?} && docker rm ${SERVICES?} && docker-compose up -d ${SERVICES?}
+    - docker exec ${SERVICES?} make migrate
+  tags:
+    - web3dev-dev
+
+dev.deploy:
+  environment:
+    name: development
+    url: https://api.market-maker-bot.dev.web3dev.group/
+  extends: .deploy 
+  variables:
+    DOCKERCOMPOSEROOT: "/var/www/dev/market-maker-bot/admin-back"
+    SERVICES: "marketmaker-admin"
+    FILE_ENV: '${DEV_ENV}'
+  only:
+    refs:
+      - develop
